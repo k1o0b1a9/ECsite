@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 const app = express();
 
-// MongoDBへの接続（MongoDB AtlasやローカルのMongoDBを使用できます）
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const ProductSchema = new mongoose.Schema({
