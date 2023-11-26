@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './App.css';
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -6,7 +7,7 @@ function App() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const response = await fetch('http://localhost:3000/api/products');
+        const response = await fetch('http://localhost:8080/api/products');
         const data = await response.json();
         const productsWithDetails = data.map(product => ({
           ...product,
@@ -33,11 +34,11 @@ function App() {
       <ul>
         {products.map(product => (
           <li key={product._id}>
-            <h2 onClick={() => toggleDetails(product._id)} style={{ cursor: 'pointer' }}>
+            <h2 onClick={() => toggleDetails(product._id)}>
               {product.name}
             </h2>
             {product.showDetails && (
-              <div>
+              <div className="product-details">
                 <p>Description: {product.description}</p>
                 <p>Price: ${product.price}</p>
                 <p>Category: {product.category}</p>
