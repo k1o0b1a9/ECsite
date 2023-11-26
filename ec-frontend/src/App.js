@@ -6,9 +6,13 @@ function App() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const response = await fetch('http://localhost:8080/api/products');
+        const response = await fetch('http://localhost:3000/api/products');
         const data = await response.json();
-        setProducts(data);
+        const productsWithDetails = data.map(product => ({
+          ...product,
+          showDetails: false
+        }));
+        setProducts(productsWithDetails);
       } catch (error) {
         console.error('Failed to fetch products:', error);
       }
@@ -17,15 +21,29 @@ function App() {
     fetchProducts();
   }, []);
 
+  const toggleDetails = (id) => {
+    setProducts(products => products.map(product => 
+      product._id === id ? { ...product, showDetails: !product.showDetails } : product
+    ));
+  };
+
   return (
     <div>
       <h1>EC Site</h1>
       <ul>
         {products.map(product => (
           <li key={product._id}>
-            <h2>{product.name}</h2>
-            <p>{product.description}</p>
-            <p>${product.price}</p>
+            <h2 onClick={() => toggleDetails(product._id)} style={{ cursor: 'pointer' }}>
+              {product.name}
+            </h2>
+            {product.showDetails && (
+              <div>
+                <p>Description: {product.description}</p>
+                <p>Price: ${product.price}</p>
+                <p>Category: {product.category}</p>
+                <p>Brand: {product.brand}</p>
+              </div>
+            )}
           </li>
         ))}
       </ul>
