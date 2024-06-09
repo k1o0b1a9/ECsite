@@ -5,7 +5,7 @@
 ## 構成
 
 - `ec-frontend`: Reactを使用したフロントエンド部分。
-- `ec-backend`: ExpressとMongoDBを使用したバックエンドAPI。
+- `ec-backend`: Expressと`nedb`を使用したバックエンドAPI。
 
 ## セットアップ手順
 
@@ -13,49 +13,55 @@
 
 1. ディレクトリに移動:
 
-```bash
-cd ec-backend
-```
+    ```bash
+    cd ec-backend
+    ```
 
 2. 依存関係をインストール:
 
-```bash
-npm install
-```
+    ```bash
+    npm install
+    ```
 
-3. `.env` ファイルにMongoDBの接続文字列を設定:
+3. `.env` ファイルに設定を追加（必要に応じて）:
 
-```
-MONGODB_URI=your_mongodb_connection_string
-```
+    ```
+    PORT=8080
+    ```
 
 4. サーバを起動:
 
-```bash
-npm start
-```
+    ```bash
+    npm start
+    ```
+
+サーバーはデフォルトで `http://localhost:8080` で実行されます。
 
 ### フロントエンド (`ec-frontend`)
 
 1. ディレクトリに移動:
 
-```bash
-cd ec-frontend
-```
+    ```bash
+    cd ec-frontend
+    ```
 
 2. 依存関係をインストール:
 
-```bash
-npm install
-```
+    ```bash
+    npm install
+    ```
 
 3. アプリケーションを起動:
 
-```bash
-npm start
-```
+    ```bash
+    npm start
+    ```
 
 アプリケーションはデフォルトで `http://localhost:3000` で実行されます。
+
+## ダミーデータ
+
+サーバー起動時に、データベースが空の場合、自動的にダミーデータが生成されます。ダミーデータはサーバー起動時に一度だけ生成され、`products.db`ファイルに保存されます。
 
 ## 貢献
 
