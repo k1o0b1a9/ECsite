@@ -1,36 +1,35 @@
-const mongoose = require('mongoose');
-require('dotenv').config();
+const Datastore = require('nedb');
+const { faker } = require('@faker-js/faker');
 
-// MongoDBへの接続
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+// データベースのインスタンス作成（メモリ内）
+const db = new Datastore({ filename: 'products.db', autoload: true });
 
-// 商品スキーマの定義
-const ProductSchema = new mongoose.Schema({
-  name: String,
-  price: Number,
-  description: String,
-  category: String,
-  brand: String
-});
-
-// 商品モデルの作成
-const Product = mongoose.model('Product', ProductSchema);
-
-// ダミーデータ
-const dummyProducts = [
-  { name: '商品1', description: 'これは商品1です', price: 1000, category: 'カテゴリ1', brand: 'ブランド1' },
-  { name: '商品2', description: 'これは商品2です', price: 2000, category: 'カテゴリ2', brand: 'ブランド2' },
-];
-
-// ダミーデータを追加する関数
-async function addDummyData() {
-  try {
-    await Product.insertMany(dummyProducts);
-    console.log('ダミーデータを追加しました');
-    mongoose.disconnect();
-  } catch (error) {
-    console.error('ダミーデータの追加に失敗しました:', error);
+// ダミーデータを生成する関数
+function generateDummyData(num) {
+  const dummyProducts = [];
+  for (let i = 0; i < num; i++) {
+    dummyProducts.push({
+      name: faker.commerce.productName(),
+      price: faker.commerce.price(),
+      description: faker.commerce.productDescription(),
+      category: faker.commerce.department(),
+      brand: faker.company.companyName()
+    });
   }
+  return dummyProducts;
 }
 
+// ダミーデータを追加する関数
+function addDummyData() {
+  const dummyProducts = generateDummyData(10); // 10件のダミーデータを生成
+  db.insert(dummyProducts, (err, newDocs) => {
+    if (err) {
+      console.error('ダミーデータの追加に失敗しました:', err);
+    } else {
+      console.log('ダミーデータを追加しました:', newDocs);
+    }
+  });
+}
+
+// ダミーデータを追加
 addDummyData();
