@@ -70,3 +70,54 @@ h2:hover {
   margin: 5px 0;
 }
 
+/* 新しいスタイル */
+.container {
+  width: 90%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.filters {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.filter {
+  position: relative;
+  margin: 0 10px;
+}
+
+.filter button {
+  background-color: #f7f7f7;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  width: 150px;
+}
+
+.filter button:hover {
+  background-color: #e7e7e7;
+}
+
+.dropdown {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.dropdown li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.dropdown li:hover {
+  background-color: #f1f1f1;
+}
