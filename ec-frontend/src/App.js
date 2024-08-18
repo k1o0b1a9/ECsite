@@ -11,6 +11,7 @@ function App() {
   const [showFilterTypeDropdown, setShowFilterTypeDropdown] = useState(false);
   const [showFilterValueDropdown, setShowFilterValueDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -72,6 +73,7 @@ function App() {
     setSelectedFilterType('');
     setSelectedFilterValue('');
     setSearchQuery('');
+    setSuggestions([]);
     setFilteredProducts(products);
   };
 
@@ -79,6 +81,25 @@ function App() {
     setFilteredProducts(products => products.map(product => 
       product._id === id ? { ...product, showDetails: !product.showDetails } : product
     ));
+  };
+
+  const handleInputChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+  
+    if (query.length > 0) {
+      const filteredSuggestions = products
+        .flatMap(product => 
+          Object.entries(product) // [key, value] のペアを取得
+            .filter(([key, value]) => key !== '_id') // _idを除外
+            .map(([key, value]) => value) // 値を取得
+        )
+        .filter(value => typeof value === 'string' && value.toLowerCase().includes(query.toLowerCase())); // クエリを含む値をフィルタリング
+  
+      setSuggestions([...new Set(filteredSuggestions)]); // 重複を除去
+    } else {
+      setSuggestions([]);
+    }
   };
 
   return (
@@ -132,7 +153,7 @@ function App() {
             className="filter-input" 
             placeholder="Search products..." 
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)} 
+            onChange={handleInputChange} 
             onKeyDown={handleKeyDown}  
           />
           <button 
@@ -140,7 +161,22 @@ function App() {
             onClick={handleSearch}
           >
             Search
-          </button>  
+          </button>
+          {suggestions.length > 0 && (
+            <ul className="suggestions-list">
+              {suggestions.map((suggestion, index) => (
+                <li 
+                  key={index} 
+                  onClick={() => {
+                    setSearchQuery(suggestion);
+                    setSuggestions([]);
+                  }}
+                >
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
       <ul>

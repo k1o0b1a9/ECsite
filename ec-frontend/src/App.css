@@ -130,3 +130,25 @@ h2:hover {
   box-sizing: border-box; 
   font-size: 16px; 
 }
+
+.suggestions-list {
+  border: 1px solid #ccc;
+  max-height: 150px;
+  overflow-y: auto;
+  background-color: white;
+  position: absolute;
+  width: 200px; /* 検索ボックスと同じ幅に */
+  z-index: 1000; /* 他の要素より前面に表示 */
+  margin-top: 0; /* テキストボックスに密接 */
+  list-style-type: none;
+  padding: 0;
+}
+
+.suggestions-list li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.suggestions-list li:hover {
+  background-color: #f0f0f0;
+}
