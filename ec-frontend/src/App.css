@@ -121,3 +121,12 @@ h2:hover {
 .dropdown li:hover {
   background-color: #f1f1f1;
 }
+
+.filter-input {
+  width: 200px; 
+  height: 40px; 
+  padding: 10px; 
+  margin: 0px; 
+  box-sizing: border-box; 
+  font-size: 16px; 
+}

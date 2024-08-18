@@ -86,7 +86,10 @@ function App() {
       <h1>EC Site</h1>
       <div className="filters">
         <div className="filter">
-          <button onClick={() => setShowFilterTypeDropdown(!showFilterTypeDropdown)}>
+          <button 
+            className="filter-input" 
+            onClick={() => setShowFilterTypeDropdown(!showFilterTypeDropdown)}
+          >
             {selectedFilterType ? `Filter by ${selectedFilterType}` : 'Select Filter'}
           </button>
           {showFilterTypeDropdown && (
@@ -105,7 +108,10 @@ function App() {
         </div>
         {selectedFilterType && showFilterValueDropdown && (
           <div className="filter">
-            <button onClick={() => setShowFilterValueDropdown(!showFilterValueDropdown)}>
+            <button 
+              className="filter-input"
+              onClick={() => setShowFilterValueDropdown(!showFilterValueDropdown)}
+            >
               {selectedFilterValue || `Select ${selectedFilterType}`}
             </button>
             {showFilterValueDropdown && (
@@ -122,13 +128,19 @@ function App() {
         )}
         <div className="filter">
           <input 
-            type="text" 
+            type="text"
+            className="filter-input" 
             placeholder="Search products..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)} 
             onKeyDown={handleKeyDown}  
           />
-          <button onClick={handleSearch}>Search</button>  
+          <button 
+            className="filter-input"
+            onClick={handleSearch}
+          >
+            Search
+          </button>  
         </div>
       </div>
       <ul>
