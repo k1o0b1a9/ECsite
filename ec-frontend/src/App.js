@@ -10,6 +10,7 @@ function App() {
   const [selectedFilterValue, setSelectedFilterValue] = useState('');
   const [showFilterTypeDropdown, setShowFilterTypeDropdown] = useState(false);
   const [showFilterValueDropdown, setShowFilterValueDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     async function fetchProducts() {
@@ -46,12 +47,31 @@ function App() {
       );
     }
 
+    if (searchQuery) {
+      filtered = filtered.filter(product =>
+        Object.values(product).some(value =>
+          typeof value === 'string' && value.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
+    }
+
     setFilteredProducts(filtered);
+  };
+
+  const handleSearch = () => {
+    filterProducts();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   const clearFilter = () => {
     setSelectedFilterType('');
     setSelectedFilterValue('');
+    setSearchQuery('');
     setFilteredProducts(products);
   };
 
@@ -100,6 +120,16 @@ function App() {
             )}
           </div>
         )}
+        <div className="filter">
+          <input 
+            type="text" 
+            placeholder="Search products..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)} 
+            onKeyDown={handleKeyDown}  
+          />
+          <button onClick={handleSearch}>Search</button>  
+        </div>
       </div>
       <ul>
         {filteredProducts.map(product => (
