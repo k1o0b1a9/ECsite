@@ -10,6 +10,8 @@ function App() {
   const [selectedFilterValue, setSelectedFilterValue] = useState('');
   const [showFilterTypeDropdown, setShowFilterTypeDropdown] = useState(false);
   const [showFilterValueDropdown, setShowFilterValueDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -46,12 +48,32 @@ function App() {
       );
     }
 
+    if (searchQuery) {
+      filtered = filtered.filter(product =>
+        Object.values(product).some(value =>
+          typeof value === 'string' && value.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
+    }
+
     setFilteredProducts(filtered);
+  };
+
+  const handleSearch = () => {
+    filterProducts();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   const clearFilter = () => {
     setSelectedFilterType('');
     setSelectedFilterValue('');
+    setSearchQuery('');
+    setSuggestions([]);
     setFilteredProducts(products);
   };
 
@@ -61,12 +83,34 @@ function App() {
     ));
   };
 
+  const handleInputChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+  
+    if (query.length > 0) {
+      const filteredSuggestions = products
+        .flatMap(product => 
+          Object.entries(product) // [key, value] のペアを取得
+            .filter(([key, value]) => key !== '_id') // _idを除外
+            .map(([key, value]) => value) // 値を取得
+        )
+        .filter(value => typeof value === 'string' && value.toLowerCase().includes(query.toLowerCase())); // クエリを含む値をフィルタリング
+  
+      setSuggestions([...new Set(filteredSuggestions)]); // 重複を除去
+    } else {
+      setSuggestions([]);
+    }
+  };
+
   return (
     <div className="container">
       <h1>EC Site</h1>
       <div className="filters">
         <div className="filter">
-          <button onClick={() => setShowFilterTypeDropdown(!showFilterTypeDropdown)}>
+          <button 
+            className="filter-input" 
+            onClick={() => setShowFilterTypeDropdown(!showFilterTypeDropdown)}
+          >
             {selectedFilterType ? `Filter by ${selectedFilterType}` : 'Select Filter'}
           </button>
           {showFilterTypeDropdown && (
@@ -85,7 +129,10 @@ function App() {
         </div>
         {selectedFilterType && showFilterValueDropdown && (
           <div className="filter">
-            <button onClick={() => setShowFilterValueDropdown(!showFilterValueDropdown)}>
+            <button 
+              className="filter-input"
+              onClick={() => setShowFilterValueDropdown(!showFilterValueDropdown)}
+            >
               {selectedFilterValue || `Select ${selectedFilterType}`}
             </button>
             {showFilterValueDropdown && (
@@ -100,6 +147,37 @@ function App() {
             )}
           </div>
         )}
+        <div className="filter">
+          <input 
+            type="text"
+            className="filter-input" 
+            placeholder="Search products..." 
+            value={searchQuery}
+            onChange={handleInputChange} 
+            onKeyDown={handleKeyDown}  
+          />
+          <button 
+            className="filter-input"
+            onClick={handleSearch}
+          >
+            Search
+          </button>
+          {suggestions.length > 0 && (
+            <ul className="suggestions-list">
+              {suggestions.map((suggestion, index) => (
+                <li 
+                  key={index} 
+                  onClick={() => {
+                    setSearchQuery(suggestion);
+                    setSuggestions([]);
+                  }}
+                >
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
       <ul>
         {filteredProducts.map(product => (
