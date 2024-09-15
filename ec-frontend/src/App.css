@@ -60,14 +60,43 @@ h2:hover {
   color: #007bff;
 }
 
-.product-details {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #ddd;
+.product-list {
+  list-style-type: none;
+  padding: 0;
 }
 
-.product-details p {
-  margin: 5px 0;
+.product-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f7f7f7;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-summary h2 {
+  margin: 0;
+  cursor: pointer;
+}
+
+.product-summary button {
+  background-color: #ff6347;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.product-summary button:hover {
+  background-color: #e5533c;
+}
+
+.product-details {
+  padding: 10px;
+  border-top: 1px solid #ddd;
 }
 
 /* 新しいスタイル */
@@ -151,4 +180,33 @@ h2:hover {
 
 .suggestions-list li:hover {
   background-color: #f0f0f0;
+}
+
+.button {
+  background-color: #f7f7f7;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  color: #333;
+  display: inline-block;
+  margin-right: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #e7e7e7;
+}
+
+.notification {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }

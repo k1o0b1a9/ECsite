@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import ProductList from './ProductList';
 import Filter from './Filter';
+import Cart from './cart';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -14,6 +16,17 @@ function App() {
   const [showFilterValueDropdown, setShowFilterValueDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
+  const [notification, setNotification] = useState('');
+  const [showNotification, setShowNotification] = useState(false);
+
+  // ページ読み込み時にローカルストレージからカートのデータを読み込む
+  useEffect(() => {
+    const savedCartItems = localStorage.getItem('cartItems');
+    if (savedCartItems) {
+      setCartItems(JSON.parse(savedCartItems));
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -39,6 +52,15 @@ function App() {
   useEffect(() => {
     filterProducts();
   }, [selectedFilterValue]);
+
+  // カートが更新されるたびにローカルストレージに保存する
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    } else {
+      localStorage.removeItem('cartItems');
+    }
+  }, [cartItems]);
 
   const filterProducts = () => {
     let filtered = products;
@@ -104,30 +126,79 @@ function App() {
     }
   };
 
+  const addToCart = (product) => {
+    setCartItems(prevCartItems => {
+      const isInCart = prevCartItems.find(item => item._id === product._id);
+
+      if (isInCart) {
+        return prevCartItems.map(item =>
+          item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      } else {
+        return [...prevCartItems, { ...product, quantity: 1 }];
+      }
+    });
+
+    setNotification(`${product.name} has been added to the cart!`);
+    setShowNotification(true);
+
+    setTimeout(() => {
+      setShowNotification(false);
+    }, 3000);
+  };
+
+  const updateQuantity = (id, quantity) => {
+    setCartItems(prevCartItems => 
+      prevCartItems
+        .map(item => (item._id === id ? { ...item, quantity } : item))
+        .filter(item => item.quantity > 0)
+    );
+  };
+
+  const removeFromCart = (id) => {
+    setCartItems(prevCartItems => prevCartItems.filter(item => item._id !== id));
+  };
+
   return (
-    <div className="container">
-      <h1>EC Site</h1>
-      <Filter
-        categories={categories}
-        brands={brands}
-        selectedFilterType={selectedFilterType}
-        setSelectedFilterType={setSelectedFilterType}
-        selectedFilterValue={selectedFilterValue}
-        setSelectedFilterValue={setSelectedFilterValue}
-        showFilterTypeDropdown={showFilterTypeDropdown}
-        setShowFilterTypeDropdown={setShowFilterTypeDropdown}
-        showFilterValueDropdown={showFilterValueDropdown}
-        setShowFilterValueDropdown={setShowFilterValueDropdown}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        handleInputChange={handleInputChange}
-        handleSearch={handleSearch}
-        handleKeyDown={handleKeyDown}
-        suggestions={suggestions}
-        setSuggestions={setSuggestions} 
-      />
-      <ProductList products={filteredProducts} toggleDetails={toggleDetails} />
-    </div>
+    <Router>
+      <div className="container">
+        <h1>EC Site</h1>
+        <nav>
+          <Link to="/" className="button">Home</Link>
+          <Link to="/cart" className="button">Cart ({cartItems.length})</Link>
+        </nav>
+
+        {showNotification && <div className="notification">{notification}</div>}
+
+        <Routes>
+          <Route path="/" element={
+            <>
+              <Filter
+                categories={categories}
+                brands={brands}
+                selectedFilterType={selectedFilterType}
+                setSelectedFilterType={setSelectedFilterType}
+                selectedFilterValue={selectedFilterValue}
+                setSelectedFilterValue={setSelectedFilterValue}
+                showFilterTypeDropdown={showFilterTypeDropdown}
+                setShowFilterTypeDropdown={setShowFilterTypeDropdown}
+                showFilterValueDropdown={showFilterValueDropdown}
+                setShowFilterValueDropdown={setShowFilterValueDropdown}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                handleInputChange={handleInputChange}
+                handleSearch={handleSearch}
+                handleKeyDown={handleKeyDown}
+                suggestions={suggestions}
+                setSuggestions={setSuggestions} 
+              />
+              <ProductList products={filteredProducts} toggleDetails={toggleDetails} addToCart={addToCart} />
+            </>
+          } />
+          <Route path="/cart" element={<Cart cartItems={cartItems} updateQuantity={updateQuantity} removeFromCart={removeFromCart} />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
