@@ -17,6 +17,8 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [cartItems, setCartItems] = useState([]);
+  const [notification, setNotification] = useState('');  // 通知メッセージの状態を追加
+  const [showNotification, setShowNotification] = useState(false);  // 通知を表示するかどうか
 
   useEffect(() => {
     async function fetchProducts() {
@@ -119,13 +121,22 @@ function App() {
         return [...prevCartItems, { ...product, quantity: 1 }];
       }
     });
+
+    // 通知メッセージを設定して表示
+    setNotification(`${product.name} has been added to the cart!`);
+    setShowNotification(true);
+
+    // 通知を3秒後に非表示にする
+    setTimeout(() => {
+      setShowNotification(false);
+    }, 3000);
   };
 
   const updateQuantity = (id, quantity) => {
     setCartItems(prevCartItems => 
       prevCartItems
         .map(item => (item._id === id ? { ...item, quantity } : item))
-        .filter(item => item.quantity > 0) // 数量が0以下ならカートから削除
+        .filter(item => item.quantity > 0)
     );
   };
 
@@ -141,6 +152,9 @@ function App() {
           <Link to="/" className="button">Home</Link>
           <Link to="/cart" className="button">Cart ({cartItems.length})</Link>
         </nav>
+
+        {/* 通知メッセージの表示 */}
+        {showNotification && <div className="notification">{notification}</div>}
 
         <Routes>
           <Route path="/" element={
