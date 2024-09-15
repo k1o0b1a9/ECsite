@@ -3,7 +3,7 @@ import './App.css';
 import ProductList from './ProductList';
 import Filter from './Filter';
 import Cart from './cart';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';  // SwitchをRoutesに変更
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -121,12 +121,23 @@ function App() {
     });
   };
 
+  const updateQuantity = (id, quantity) => {
+    setCartItems(prevCartItems => 
+      prevCartItems
+        .map(item => (item._id === id ? { ...item, quantity } : item))
+        .filter(item => item.quantity > 0) // 数量が0以下ならカートから削除
+    );
+  };
+
+  const removeFromCart = (id) => {
+    setCartItems(prevCartItems => prevCartItems.filter(item => item._id !== id));
+  };
+
   return (
     <Router>
       <div className="container">
         <h1>EC Site</h1>
         <nav>
-          {/* className="button" を追加してボタンの見た目にする */}
           <Link to="/" className="button">Home</Link>
           <Link to="/cart" className="button">Cart ({cartItems.length})</Link>
         </nav>
@@ -156,7 +167,7 @@ function App() {
               <ProductList products={filteredProducts} toggleDetails={toggleDetails} addToCart={addToCart} />
             </>
           } />
-          <Route path="/cart" element={<Cart cartItems={cartItems} />} />
+          <Route path="/cart" element={<Cart cartItems={cartItems} updateQuantity={updateQuantity} removeFromCart={removeFromCart} />} />
         </Routes>
       </div>
     </Router>
