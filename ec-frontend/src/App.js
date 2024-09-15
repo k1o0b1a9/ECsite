@@ -17,8 +17,16 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [cartItems, setCartItems] = useState([]);
-  const [notification, setNotification] = useState('');  // 通知メッセージの状態を追加
-  const [showNotification, setShowNotification] = useState(false);  // 通知を表示するかどうか
+  const [notification, setNotification] = useState('');
+  const [showNotification, setShowNotification] = useState(false);
+
+  // ページ読み込み時にローカルストレージからカートのデータを読み込む
+  useEffect(() => {
+    const savedCartItems = localStorage.getItem('cartItems');
+    if (savedCartItems) {
+      setCartItems(JSON.parse(savedCartItems));
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -44,6 +52,15 @@ function App() {
   useEffect(() => {
     filterProducts();
   }, [selectedFilterValue]);
+
+  // カートが更新されるたびにローカルストレージに保存する
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    } else {
+      localStorage.removeItem('cartItems');
+    }
+  }, [cartItems]);
 
   const filterProducts = () => {
     let filtered = products;
@@ -122,11 +139,9 @@ function App() {
       }
     });
 
-    // 通知メッセージを設定して表示
     setNotification(`${product.name} has been added to the cart!`);
     setShowNotification(true);
 
-    // 通知を3秒後に非表示にする
     setTimeout(() => {
       setShowNotification(false);
     }, 3000);
@@ -153,7 +168,6 @@ function App() {
           <Link to="/cart" className="button">Cart ({cartItems.length})</Link>
         </nav>
 
-        {/* 通知メッセージの表示 */}
         {showNotification && <div className="notification">{notification}</div>}
 
         <Routes>
