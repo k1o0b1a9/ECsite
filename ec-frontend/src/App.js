@@ -126,11 +126,12 @@ function App() {
       <div className="container">
         <h1>EC Site</h1>
         <nav>
-          <Link to="/">Home</Link>
-          <Link to="/cart">Cart ({cartItems.length})</Link>
+          {/* className="button" を追加してボタンの見た目にする */}
+          <Link to="/" className="button">Home</Link>
+          <Link to="/cart" className="button">Cart ({cartItems.length})</Link>
         </nav>
 
-        <Routes>  {/* Switch を Routes に変更 */}
+        <Routes>
           <Route path="/" element={
             <>
               <Filter
@@ -155,7 +156,7 @@ function App() {
               <ProductList products={filteredProducts} toggleDetails={toggleDetails} addToCart={addToCart} />
             </>
           } />
-          <Route path="/cart" element={<Cart cartItems={cartItems} />} />  {/* Route 内で element にコンポーネントを指定 */}
+          <Route path="/cart" element={<Cart cartItems={cartItems} />} />
         </Routes>
       </div>
     </Router>
