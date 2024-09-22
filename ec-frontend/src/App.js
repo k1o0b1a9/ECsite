@@ -3,6 +3,7 @@ import './App.css';
 import ProductList from './ProductList';
 import Filter from './Filter';
 import cart from './cart';
+import Login from './Login'; 
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 
 function App() {
@@ -19,39 +20,21 @@ function App() {
   const [cartItems, setCartItems] = useState([]);
   const [notification, setNotification] = useState('');
   const [showNotification, setShowNotification] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // ログイン状態の管理
+  const [token, setToken] = useState(null);
 
   // ページ読み込み時にローカルストレージからカートのデータを読み込む
   useEffect(() => {
     const savedCartItems = localStorage.getItem('cartItems');
+    const savedToken = localStorage.getItem('token');
     if (savedCartItems) {
       setCartItems(JSON.parse(savedCartItems));
     }
-  }, []);
-
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const response = await fetch('http://localhost:8080/api/products');
-        const data = await response.json();
-        const productsWithDetails = data.map(product => ({
-          ...product,
-          showDetails: false
-        }));
-        setProducts(productsWithDetails);
-        setFilteredProducts(productsWithDetails);
-        setCategories([...new Set(data.map(product => product.category))]);
-        setBrands([...new Set(data.map(product => product.brand))]);
-      } catch (error) {
-        console.error('Failed to fetch products:', error);
-      }
+    if (savedToken) {
+      setToken(savedToken);
+      setIsLoggedIn(true);
     }
-
-    fetchProducts();
   }, []);
-
-  useEffect(() => {
-    filterProducts();
-  }, [selectedFilterValue]);
 
   // カートが更新されるたびにローカルストレージに保存する
   useEffect(() => {
@@ -82,6 +65,31 @@ function App() {
 
     setFilteredProducts(filtered);
   };
+
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const response = await fetch('http://localhost:8080/api/products');
+        const data = await response.json();
+        const productsWithDetails = data.map(product => ({
+          ...product,
+          showDetails: false
+        }));
+        setProducts(productsWithDetails);
+        setFilteredProducts(productsWithDetails);
+        setCategories([...new Set(data.map(product => product.category))]);
+        setBrands([...new Set(data.map(product => product.brand))]);
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      }
+    }
+
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    filterProducts();
+  }, [selectedFilterValue]);
 
   const handleSearch = () => {
     filterProducts();
@@ -159,6 +167,36 @@ function App() {
     setCartItems(prevCartItems => prevCartItems.filter(item => item._id !== id));
   };
 
+  // ログイン機能
+  const handleLogin = async (email, password) => {
+    try {
+      const response = await fetch('http://localhost:8080/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        setToken(data.token);
+        setIsLoggedIn(true);
+        alert('Login successful');
+      } else {
+        alert('Login failed');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+    }
+  };
+
+  // ログアウト機能
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+    setIsLoggedIn(false);
+    alert('Logged out');
+  };
+
   return (
     <Router>
       <div className="container">
@@ -166,6 +204,11 @@ function App() {
         <nav>
           <Link to="/" className="button">Home</Link>
           <Link to="/cart" className="button">cart ({cartItems.length})</Link>
+          {isLoggedIn ? (
+            <button onClick={handleLogout} className="button">Logout</button>
+          ) : (
+            <Link to="/login" className="button">Login</Link>
+          )}
         </nav>
 
         {showNotification && <div className="notification">{notification}</div>}
@@ -196,6 +239,8 @@ function App() {
             </>
           } />
           <Route path="/cart" element={<cart cartItems={cartItems} updateQuantity={updateQuantity} removeFromCart={removeFromCart} />} />
+          {/* ログインページのルート */}
+          <Route path="/login" element={<Login handleLogin={handleLogin} />} />
         </Routes>
       </div>
     </Router>
