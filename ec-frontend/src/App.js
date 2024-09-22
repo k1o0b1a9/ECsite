@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import ProductList from './ProductList';
 import Filter from './Filter';
-import cart from './cart';
+import Cart from './Cart';
 import Login from './Login'; 
+import Register from './Register';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 
 function App() {
@@ -20,7 +21,7 @@ function App() {
   const [cartItems, setCartItems] = useState([]);
   const [notification, setNotification] = useState('');
   const [showNotification, setShowNotification] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // ログイン状態の管理
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const [token, setToken] = useState(null);
 
   // ページ読み込み時にローカルストレージからカートのデータを読み込む
@@ -147,7 +148,7 @@ function App() {
       }
     });
 
-    setNotification(`${product.name} has been added to the cart!`);
+    setNotification(`${product.name} has been added to the Cart!`);
     setShowNotification(true);
 
     setTimeout(() => {
@@ -165,6 +166,25 @@ function App() {
 
   const removeFromCart = (id) => {
     setCartItems(prevCartItems => prevCartItems.filter(item => item._id !== id));
+  };
+
+  // 新規登録機能
+  const handleRegister = async (username, email, password) => {
+    try {
+      const response = await fetch('http://localhost:8080/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password }),
+      });
+      const data = await response.json();
+      if (response.status === 201) {
+        alert('Registration successful');
+      } else {
+        alert('Registration failed: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Error during registration:', error);
+    }
   };
 
   // ログイン機能
@@ -203,11 +223,14 @@ function App() {
         <h1>EC Site</h1>
         <nav>
           <Link to="/" className="button">Home</Link>
-          <Link to="/cart" className="button">cart ({cartItems.length})</Link>
+          <Link to="/cart" className="button">Cart ({cartItems.length})</Link>
           {isLoggedIn ? (
             <button onClick={handleLogout} className="button">Logout</button>
           ) : (
-            <Link to="/login" className="button">Login</Link>
+            <>
+              <Link to="/login" className="button">Login</Link>
+              <Link to="/register" className="button">Register</Link> {/* 新規登録リンク */}
+            </>
           )}
         </nav>
 
@@ -238,9 +261,11 @@ function App() {
               <ProductList products={filteredProducts} toggleDetails={toggleDetails} addToCart={addToCart} />
             </>
           } />
-          <Route path="/cart" element={<cart cartItems={cartItems} updateQuantity={updateQuantity} removeFromCart={removeFromCart} />} />
+          <Route path="/cart" element={<Cart cartItems={cartItems} updateQuantity={updateQuantity} removeFromCart={removeFromCart} />} />
           {/* ログインページのルート */}
           <Route path="/login" element={<Login handleLogin={handleLogin} />} />
+          {/* 新規登録ページのルート */}
+          <Route path="/register" element={<Register handleRegister={handleRegister} />} />
         </Routes>
       </div>
     </Router>
