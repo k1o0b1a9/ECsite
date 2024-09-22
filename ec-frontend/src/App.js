@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import ProductList from './ProductList';
 import Filter from './Filter';
-import Cart from './cart';
+import cart from './cart';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 
 function App() {
@@ -165,7 +165,7 @@ function App() {
         <h1>EC Site</h1>
         <nav>
           <Link to="/" className="button">Home</Link>
-          <Link to="/cart" className="button">Cart ({cartItems.length})</Link>
+          <Link to="/cart" className="button">cart ({cartItems.length})</Link>
         </nav>
 
         {showNotification && <div className="notification">{notification}</div>}
@@ -195,7 +195,7 @@ function App() {
               <ProductList products={filteredProducts} toggleDetails={toggleDetails} addToCart={addToCart} />
             </>
           } />
-          <Route path="/cart" element={<Cart cartItems={cartItems} updateQuantity={updateQuantity} removeFromCart={removeFromCart} />} />
+          <Route path="/cart" element={<cart cartItems={cartItems} updateQuantity={updateQuantity} removeFromCart={removeFromCart} />} />
         </Routes>
       </div>
     </Router>
