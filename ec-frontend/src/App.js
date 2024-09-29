@@ -5,6 +5,8 @@ import Filter from './Filter';
 import Cart from './Cart';
 import Login from './Login'; 
 import Register from './Register';
+import ChangePassword from './ChangePassword'; 
+import DeleteAccount from './DeleteAccount';  
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 
 function App() {
@@ -23,6 +25,50 @@ function App() {
   const [showNotification, setShowNotification] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const [token, setToken] = useState(null);
+
+  // パスワード変更機能
+  const handleChangePassword = async (oldPassword, newPassword) => {
+    try {
+      const response = await fetch('http://localhost:8080/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ oldPassword, newPassword }),
+      });
+      if (response.ok) {
+        alert('Password changed successfully');
+      } else {
+        alert('Failed to change password');
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+    }
+  };
+
+  // アカウント削除機能
+  const handleDeleteAccount = async (password) => {
+    try {
+      const response = await fetch('http://localhost:8080/api/auth/delete-account', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ password }),  // パスワードを送信
+      });
+      if (response.ok) {
+        localStorage.removeItem('token');
+        setIsLoggedIn(false);
+        alert('Account deleted successfully');
+      } else {
+        alert('Failed to delete account');
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error);
+    }
+  };
 
   // ページ読み込み時にローカルストレージからカートのデータを読み込む
   useEffect(() => {
@@ -222,14 +268,18 @@ function App() {
       <div className="container">
         <h1>EC Site</h1>
         <nav>
-          <Link to="/" className="button">Home</Link>
-          <Link to="/cart" className="button">Cart ({cartItems.length})</Link>
+        <Link to="/" className="button">Home</Link>
+        <Link to="/cart" className="button">Cart ({cartItems.length})</Link>
           {isLoggedIn ? (
-            <button onClick={handleLogout} className="button">Logout</button>
+            <>
+              <Link to="/change-password" className="button">Change Password</Link>
+              <Link to="/delete-account" className="button">Delete Account</Link>
+              <button onClick={handleLogout} className="button">Logout</button>
+            </>
           ) : (
             <>
               <Link to="/login" className="button">Login</Link>
-              <Link to="/register" className="button">Register</Link> {/* 新規登録リンク */}
+              <Link to="/register" className="button">Register</Link>
             </>
           )}
         </nav>
@@ -262,10 +312,10 @@ function App() {
             </>
           } />
           <Route path="/cart" element={<Cart cartItems={cartItems} updateQuantity={updateQuantity} removeFromCart={removeFromCart} />} />
-          {/* ログインページのルート */}
           <Route path="/login" element={<Login handleLogin={handleLogin} />} />
-          {/* 新規登録ページのルート */}
           <Route path="/register" element={<Register handleRegister={handleRegister} />} />
+          <Route path="/change-password" element={<ChangePassword handleChangePassword={handleChangePassword} />} />
+          <Route path="/delete-account" element={<DeleteAccount handleDeleteAccount={handleDeleteAccount} />} />
         </Routes>
       </div>
     </Router>
