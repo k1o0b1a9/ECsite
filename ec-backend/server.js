@@ -15,8 +15,12 @@ const app = express();
 const db = new Datastore({ filename: 'products.db', autoload: true });
 const usersDb = new Datastore({ filename: 'users.db', autoload: true }); // ユーザー用データベース
 
-// CORSの設定
-app.use(cors());
+// CORSの詳細設定
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:8080'], // フロントエンドのURLを許可
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // 許可するHTTPメソッド
+  allowedHeaders: ['Content-Type', 'Authorization'], // 許可するヘッダー
+}));
 app.use(express.json());
 
 // JWT Secret
@@ -115,6 +119,57 @@ app.post('/api/auth/login', (req, res) => {
 app.post('/api/auth/logout', (req, res) => {
   // フロントエンドでJWTトークンを削除するだけで実装できます
   res.json({ message: 'Logged out successfully' });
+});
+
+// パスワード変更エンドポイント
+app.post('/api/auth/change-password', async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const token = req.headers.authorization.split(' ')[1];
+  
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const userId = decoded.userId;
+
+    usersDb.findOne({ _id: userId }, async (err, user) => {
+      if (!user) {
+        return res.status(404).send('User not found');
+      }
+
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).send('Old password is incorrect');
+      }
+
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      usersDb.update({ _id: userId }, { $set: { password: hashedNewPassword } }, {}, (err) => {
+        if (err) {
+          return res.status(500).send('Error updating password');
+        }
+        res.status(200).send('Password changed successfully');
+      });
+    });
+  } catch (error) {
+    res.status(500).send('Error processing request');
+  }
+});
+
+// アカウント削除エンドポイント
+app.delete('/api/auth/delete-account', async (req, res) => {
+  const token = req.headers.authorization.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const userId = decoded.userId;
+
+    usersDb.remove({ _id: userId }, {}, (err, numRemoved) => {
+      if (err) {
+        return res.status(500).send('Error deleting account');
+      }
+      res.status(200).send('Account deleted successfully');
+    });
+  } catch (error) {
+    res.status(500).send('Error processing request');
+  }
 });
 
 // サーバー起動
