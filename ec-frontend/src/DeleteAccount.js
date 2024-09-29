@@ -1,18 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-function DeleteAccount({ handleDeleteAccount }) {
-  const onDelete = () => {
-    if (window.confirm('Are you sure you want to delete your account?')) {
-      handleDeleteAccount();
-    }
+const DeleteAccount = ({ handleDeleteAccount }) => {
+  const [password, setPassword] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleDeleteAccount(password);
   };
 
   return (
     <div>
       <h2>Delete Account</h2>
-      <button onClick={onDelete}>Delete Account</button>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Password:</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Delete Account</button>
+      </form>
     </div>
   );
-}
+};
 
 export default DeleteAccount;

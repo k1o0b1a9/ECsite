@@ -48,13 +48,15 @@ function App() {
   };
 
   // アカウント削除機能
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = async (password) => {
     try {
       const response = await fetch('http://localhost:8080/api/auth/delete-account', {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify({ password }),  // パスワードを送信
       });
       if (response.ok) {
         localStorage.removeItem('token');

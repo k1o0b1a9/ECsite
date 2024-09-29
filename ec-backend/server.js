@@ -155,19 +155,40 @@ app.post('/api/auth/change-password', async (req, res) => {
 
 // アカウント削除エンドポイント
 app.delete('/api/auth/delete-account', async (req, res) => {
-  const token = req.headers.authorization.split(' ')[1];
+  const { password } = req.body; // フロントエンドから送信されたパスワード
+  const token = req.headers.authorization?.split(' ')[1]; // トークンからユーザーIDを取得
+
+  if (!token) {
+    return res.status(401).send('Authorization token missing');
+  }
 
   try {
+    // トークンを検証して、ログインしているユーザーの情報を取得
     const decoded = jwt.verify(token, JWT_SECRET);
     const userId = decoded.userId;
 
-    usersDb.remove({ _id: userId }, {}, (err, numRemoved) => {
-      if (err) {
-        return res.status(500).send('Error deleting account');
+    // データベースからユーザー情報を取得
+    usersDb.findOne({ _id: userId }, async (err, user) => {
+      if (!user) {
+        return res.status(404).send('User not found');
       }
-      res.status(200).send('Account deleted successfully');
+
+      // 入力されたパスワードとユーザーのパスワードを比較
+      const isPasswordMatch = await bcrypt.compare(password, user.password);
+      if (!isPasswordMatch) {
+        return res.status(400).send('Invalid password'); // パスワードが一致しない場合
+      }
+
+      // パスワードが一致すればアカウントを削除
+      usersDb.remove({ _id: userId }, {}, (err, numRemoved) => {
+        if (err) {
+          return res.status(500).send('Error deleting account');
+        }
+        res.status(200).send('Account deleted successfully');
+      });
     });
   } catch (error) {
+    console.error('JWT verification error:', error);
     res.status(500).send('Error processing request');
   }
 });
