@@ -69,3 +69,8 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+app.use((err, req, res, next) => {
+  console.error(err.stack); // エラーログをコンソールに出力
+  res.status(500).json({ error: 'Internal Server Error', message: err.message });
+});
