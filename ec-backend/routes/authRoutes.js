@@ -24,63 +24,66 @@ authRoutes.post('/register', async (req, res, next) => {
 });
 
 // アカウント削除エンドポイント
-authRoutes.delete('/delete-account', async (req, res) => {
+authRoutes.delete('/delete-account', async (req, res, next) => {
     const { password } = req.body;
     const token = req.headers.authorization?.split(' ')[1];
-  
+
     if (!token) {
-      return res.status(401).send('Authorization token missing');
+        return res.status(401).send('Authorization token missing');
     }
-  
+
     try {
-      const decoded = jwt.verify(token, JWT_SECRET);
-      const userId = decoded.userId;
-  
-      usersDb.findOne({ _id: userId }, async (err, user) => {
-        if (!user) {
-          return res.status(404).send('User not found');
-        }
-  
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
-        if (!isPasswordMatch) {
-          return res.status(400).send('Invalid password');
-        }
-  
-        usersDb.remove({ _id: userId }, {}, (err, numRemoved) => {
-          if (err) {
-            return res.status(500).send('Error deleting account');
-          }
-          res.status(200).send('Account deleted successfully');
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const userId = decoded.userId;
+
+        usersDb.findOne({ _id: userId }, async (err, user) => {
+            if (err) return next(err); // エラーをミドルウェアに渡す
+            if (!user) {
+                return res.status(404).send('User not found');
+            }
+
+            const isPasswordMatch = await bcrypt.compare(password, user.password);
+            if (!isPasswordMatch) {
+                return res.status(400).send('Invalid password');
+            }
+
+            usersDb.remove({ _id: userId }, {}, (err, numRemoved) => {
+                if (err) return next(err); // エラーをミドルウェアに渡す
+                res.status(200).send('Account deleted successfully');
+            });
         });
-      });
     } catch (error) {
-      res.status(500).send('Error processing request');
+        next(error); // エラーをミドルウェアに渡す
     }
 });
 
 // ユーザーログインエンドポイント
-authRoutes.post('/login', (req, res) => {
-  const { email, password } = req.body;
+authRoutes.post('/login', (req, res, next) => {
+    const { email, password } = req.body;
 
-  usersDb.findOne({ email }, async (err, user) => {
-    if (!user) {
-      return res.status(400).send('User not found');
-    }
+    usersDb.findOne({ email }, async (err, user) => {
+        if (err) return next(err); // エラーをミドルウェアに渡す
+        if (!user) {
+            return res.status(400).send('User not found');
+        }
 
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
-    if (!isPasswordMatch) {
-      return res.status(400).send('Invalid credentials');
-    }
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        if (!isPasswordMatch) {
+            return res.status(400).send('Invalid credentials');
+        }
 
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
-  });
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+        res.json({ token });
+    });
 });
 
 // ユーザーログアウトエンドポイント
-authRoutes.post('/logout', (req, res) => {
-    // ログアウト処理はクライアント側でJWTを削除するだけです
-    res.json({ message: 'Logged out successfully' });
+authRoutes.post('/logout', (req, res, next) => {
+    try {
+        res.json({ message: 'Logged out successfully' });
+    } catch (error) {
+        next(error); 
+    }
 });
 
 // パスワード変更エンドポイント
